@@ -1,0 +1,153 @@
+/* Common Page Styling */
+.home-page {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(to bottom right, #e0f2fe, #bfdbfe); /* Same as CostEstimationForm */
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    color: #333;
+  }
+  
+  /* Navbar Styling */
+  .cost-nav {
+    background-color: white;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .cost-nav-brand {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #2563eb;
+  }
+
+  .cost-nav-brand:hover{
+    color: #1d4ed8;
+  }
+  
+  .home-links {
+    list-style: none;
+    display: flex;
+    gap: 1.5rem;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .home-links li a {
+    text-decoration: none;
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #4375e0;
+    transition: color 0.3s ease;
+  }
+  
+  .home-links li a:hover {
+    color: #1d4ed8;
+  }
+  
+  /* Main Content Styling */
+  .home-main {
+    padding: 4rem 2rem;
+    text-align: center;
+  }
+  
+  .home-main h1 {
+    font-size: 2.5rem;
+    color: #1e3a8a;
+    margin-bottom: 1rem;
+  }
+  
+  .home-subtitle {
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto 3rem auto;
+    color: #4b5563;
+  }
+  
+  /* Button Cards */
+  .home-buttons {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 2rem;
+  }
+  
+  .home-card {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+    width: 260px;
+    transition: all 0.3s ease;
+  }
+  
+  .home-card h3 {
+    font-size: 1.3rem;
+    color: #2563eb;
+    margin-bottom: 1rem;
+  }
+  
+  .home-card button {
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+    color: white;
+    background-color: #2563eb;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .home-card button:hover {
+    background-color: #1d4ed8;
+  }
+  
+  /* Animations */
+  .fade-in {
+    animation: fadeIn 0.6s ease-out;
+  }
+  
+  .fade-in-down {
+    animation: fadeInDown 0.6s ease-out;
+  }
+  
+  .fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes fadeInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Hover Scale */
+  .hover-scale:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+  }
+  
