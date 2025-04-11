@@ -77,23 +77,27 @@
   
   .home-card {
     background-color: white;
-    padding: 2rem;
-    border-radius: 16px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
-    width: 260px;
+    padding: 2.5rem; /* Increased padding */
+    border-radius: 20px; /* Slightly larger radius */
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12); /* Slightly more prominent shadow */
+    width: 420px; /* Increased width */
+    height: 270px;
     transition: all 0.3s ease;
   }
   
+  
   .home-card h3 {
-    font-size: 1.3rem;
+    font-size: 2.5rem;
     color: #2563eb;
-    margin-bottom: 1rem;
+    margin-bottom: 2.9rem;
   }
   
   .home-card button {
-    padding: 0.6rem 1.2rem;
-    font-size: 1rem;
+    padding: 0.8rem 1.4rem;
+    font-size: 1.5rem;
     color: white;
+    width: 300px;
+    height: 60px;
     background-color: #2563eb;
     border: none;
     border-radius: 8px;

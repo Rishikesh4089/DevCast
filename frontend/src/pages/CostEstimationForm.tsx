@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // For navigation
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Home, ArrowLeft } from 'lucide-react';
 import './CostEstimationForm.css';
@@ -27,46 +27,59 @@ const CostEstimationForm: React.FC = () => {
     ['Requirment stability']: 0,
   });
 
+  const [modelChoice, setModelChoice] = useState<'ensemble' | 'svm'>('ensemble');
   const [prediction, setPrediction] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const navigate = useNavigate(); // React Router navigation
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    const parsedValue = parseFloat(value);
     setInputs((prev) => ({
       ...prev,
-      [name]: parseFloat(value) || 0,
+      [name]: isNaN(parsedValue) ? 0 : parsedValue,
     }));
+  };
+
+  const handleModelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value as 'ensemble' | 'svm';
+    setModelChoice(value);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setPrediction(null);
-  
-    // Check if any input is left empty
-    const isAnyFieldEmpty = Object.values(inputs).some(value => value === null || value === undefined || value === 0);
+
+    const isAnyFieldEmpty = Object.values(inputs).some(
+      (value) => value === null || value === undefined || value === 0
+    );
+
     if (isAnyFieldEmpty) {
-      setError("Please fill out all fields before submitting the form.");
+      setError('Please fill out all fields before submitting the form.');
       return;
     }
-  
+
     setLoading(true);
     try {
-      const response = await axios.post('http://127.0.0.1:5001/estimate', inputs);
+      const response = await axios.post('http://127.0.0.1:5001/estimate', {
+        ...inputs,
+        model_choice: modelChoice,
+      });
+
       if (!response.data.estimated_effort) {
-        throw new Error("Invalid API response format");
+        throw new Error('Invalid API response format');
       }
+
       setPrediction(response.data.estimated_effort);
     } catch (err) {
-      setError("Failed to get estimation. Please check inputs or try again.");
+      setError('Failed to get estimation. Please check inputs or try again.');
     } finally {
       setLoading(false);
     }
   };
-  
 
   return (
     <div className="cost-page">
@@ -84,20 +97,41 @@ const CostEstimationForm: React.FC = () => {
         <div className="cost-container">
           <form onSubmit={handleSubmit} className="cost-form">
             <h1>Input Project Parameters</h1>
-            {Object.keys(inputs).map((key) => (
+
+            {/* Model Selection Dropdown */}
+            <div className="form-group">
+              <label htmlFor="modelChoice">Select Model</label>
+              <select
+                id="modelChoice"
+                name="modelChoice"
+                value={modelChoice}
+                onChange={handleModelChange}
+                required
+              >
+                <option value="ensemble">Ensemble (Recommended)</option>
+                <option value="svm">SVM</option>
+              </select>
+            </div>
+
+            {Object.entries(inputs).map(([key, value]) => (
               <div key={key} className="form-group">
-                <label>{key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}</label>
+                <label htmlFor={key}>
+                  {key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
+                </label>
                 <input
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
+                  type="number"
+                  min="0"
+                  step="any"
                   name={key}
-                  placeholder="Enter value"
-                  value={inputs[key as keyof InputData] || ''}
+                  id={key}
+                  value={value}
                   onChange={handleChange}
+                  placeholder="Enter value"
+                  required
                 />
               </div>
             ))}
+
             <button type="submit" disabled={loading}>
               {loading ? 'Estimating...' : 'Estimate Effort'}
             </button>
@@ -109,12 +143,15 @@ const CostEstimationForm: React.FC = () => {
               <div>
                 <h2>Estimation Result</h2>
                 <p>
-                  Estimated Effort (Person-Hours): <span className="prediction">{prediction.toFixed(2)}</span>
+                  Estimated Effort (Person-Hours):{' '}
+                  <span className="prediction">{prediction.toFixed(2)}</span>
                 </p>
               </div>
             )}
             {!prediction && !error && !loading && (
-              <div className="placeholder">Your estimated effort will appear here after submission.</div>
+              <div className="placeholder">
+                Your estimated effort will appear here after submission.
+              </div>
             )}
           </div>
         </div>

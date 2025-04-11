@@ -7,11 +7,12 @@ import logging
 from sklearn.base import BaseEstimator, TransformerMixin
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all domains
+CORS(app)
 
-# Configure logging
+# Setup logger
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+
 
 class ExperienceTransformer(BaseEstimator, TransformerMixin):
     def __init__(self):
@@ -27,54 +28,63 @@ class ExperienceTransformer(BaseEstimator, TransformerMixin):
 
     def transform(self, X):
         if self.feature_names_ is None:
-            raise ValueError("ExperienceTransformer must be fitted before calling transform().")
-
+            raise ValueError("Transformer not fitted yet.")
         X = X.copy()
         missing = set(self.feature_names_) - set(X.columns)
         if missing:
-            raise ValueError(f"Missing features: {missing}")
-
+            raise ValueError(f"Missing features during transform: {missing}")
         for feature in self.exp_features:
             if feature in X.columns:
-                capped_exp = np.minimum(X[feature], 5)
-                X[feature] = 1.0 - (0.3 * capped_exp / 5)
-
+                capped = np.minimum(X[feature], 5)
+                X[feature] = 1.0 - (0.3 * capped / 5)
         return X[self.feature_names_]
 
     def get_feature_names_out(self, input_features=None):
         return self.feature_names_
 
-def enforce_experience_effect(X, preds):
+
+def enforce_experience_effect(X, base_pred):
     prog_exp = np.minimum(X['Programmers experience in programming language'], 5)
     pm_exp = np.minimum(X['Project manager experience'], 5)
     exp_factor = 1.0 - (0.06 * (prog_exp + pm_exp) / 2)
-    exp_factor = np.maximum(exp_factor, 0.7)
-    return preds * exp_factor
+    return np.maximum(base_pred * exp_factor, base_pred * 0.7)
 
-# Load ensemble model components
+
+# Load both model files
 try:
-    model_data = joblib.load('improved_software_cost_estimator.pkl')
-    xgb_model = model_data['xgb_model']
-    rf_model = model_data['rf_model']
-    lr_pipe = model_data['lr_pipe']
-    exp_transformer = model_data['exp_transformer']
-    feature_order = model_data['features']
-    weights = model_data['ensemble_weights']
+    # Ensemble model components
+    ensemble_data = joblib.load('improved_software_cost_estimator.pkl')
+    xgb_model = ensemble_data['xgb_model']
+    rf_model = ensemble_data['rf_model']
+    lr_pipe = ensemble_data['lr_pipe']
+    ensemble_weights = ensemble_data['ensemble_weights']
+    exp_transformer_ensemble = ensemble_data['exp_transformer']
+    feature_order_ensemble = ensemble_data['features']
 
-    # Ensure transformer is fitted
-    if getattr(exp_transformer, 'feature_names_', None) is None:
-        exp_transformer.fit(pd.DataFrame(columns=feature_order))
+    if getattr(exp_transformer_ensemble, 'feature_names_', None) is None:
+        exp_transformer_ensemble.fit(pd.DataFrame(columns=feature_order_ensemble))
 
-    logger.info("Ensemble models loaded successfully.")
+    # SVR model loading and transformer fitting
+    svr_model = joblib.load('svr_effort_model_tuned.pkl')
+    exp_transformer_svr = ExperienceTransformer()
+    feature_order_svr = feature_order_ensemble  # or a separate one if SVR model uses different
+    exp_transformer_svr.fit(pd.DataFrame(columns=feature_order_svr))
+
+    logger.info("✅ All models loaded successfully.")
+
 except Exception as e:
-    logger.error(f"Error loading model: {e}", exc_info=True)
+    logger.error("❌ Failed to load model(s): %s", str(e), exc_info=True)
     raise
+
 
 @app.route('/estimate', methods=['POST'])
 def estimate():
     try:
         input_data = request.json
-        logger.debug(f"Incoming request: {input_data}")
+        logger.debug("Received input: %s", input_data)
+
+        model_choice = input_data.get('model_choice', 'ensemble')
+        logger.debug("Model selected: %s", model_choice)
 
         required_features = [
             'Size of organization',
@@ -82,45 +92,61 @@ def estimate():
             'Daily working hours',
             'Object points',
             '# Multiple programing languages',
-            'Programmers experience in programming language', 
+            'Programmers experience in programming language',
             'Project manager experience',
             'Requirment stability'
         ]
 
+        for feature in required_features:
+            if feature not in input_data:
+                return jsonify({
+                    "error": f"Missing required field: {feature}",
+                    "status": "error"
+                }), 400
+
         input_df = pd.DataFrame([input_data])[required_features]
-        logger.debug(f"Input DataFrame:\n{input_df}")
+        logger.debug("Constructed DataFrame:\n%s", input_df)
 
-        input_transformed = exp_transformer.transform(input_df)
-        logger.debug(f"Transformed features: {input_transformed.columns.tolist()}")
+        if model_choice == 'ensemble':
+            transformed = exp_transformer_ensemble.transform(input_df)
+            xgb_val = float(xgb_model.predict(transformed).item())
+            rf_val = float(rf_model.predict(transformed).item())
+            lr_val = float(lr_pipe.predict(transformed).item())
 
-        # Get scalar values
-        xgb_val = float(xgb_model.predict(input_transformed).item())
-        rf_val = float(rf_model.predict(input_transformed).item())
-        lr_val = float(lr_pipe.predict(input_transformed).item())
+            raw_effort = (
+                ensemble_weights['xgb'] * xgb_val +
+                ensemble_weights['rf'] * rf_val +
+                ensemble_weights['lr'] * lr_val
+            )
 
-        # Raw effort from ensemble
-        raw_effort = (
-            weights['xgb'] * xgb_val +
-            weights['rf'] * rf_val +
-            weights['lr'] * lr_val
-        )
+            adjusted_effort = float(enforce_experience_effect(input_df, raw_effort))
 
-        # Adjusted effort
-        final_effort = float(enforce_experience_effect(input_transformed, raw_effort))
+        elif model_choice == 'svm':
+            transformed = exp_transformer_svr.transform(input_df)
+            raw_effort = float(svr_model.predict(transformed).item())
+            adjusted_effort = float(enforce_experience_effect(input_df, raw_effort))
 
-        logger.info(f"Prediction successful. Raw: {raw_effort:.2f}, Adjusted: {final_effort:.2f}")
+        else:
+            return jsonify({
+                "error": f"Unsupported model choice: {model_choice}",
+                "status": "error"
+            }), 400
+
+        logger.info(f"🔍 Final Effort - Model: {model_choice}, Raw: {raw_effort:.2f}, Adjusted: {adjusted_effort:.2f}")
+
         return jsonify({
-            "estimated_effort": round(final_effort, 2),
+            "estimated_effort": round(adjusted_effort, 2),
             "status": "success"
         })
 
     except Exception as e:
-        logger.error(f"Error during estimation: {str(e)}", exc_info=True)
+        logger.error("Estimation error: %s", str(e), exc_info=True)
         return jsonify({
             "error": "Internal server error",
             "details": str(e),
             "status": "error"
         }), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5001)
