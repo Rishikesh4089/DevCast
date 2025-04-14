@@ -1,6 +1,5 @@
 
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import BackgroundAnimation from './animations/background'
 import './App.css'
 import HomePage from './pages/home'
 import CostEstimationForm from './pages/CostEstimationForm';
