@@ -62,9 +62,12 @@ const CostEstimationForm: React.FC = () => {
       return;
     }
 
+    //change was made here
+    const API_BASE_URL = process.env.REACT_APP_API_URL;
+
     setLoading(true);
     try {
-      const response = await axios.post('http://127.0.0.1:5001/estimate', {
+      const response = await axios.post('${API_BASE_URL}/estimate', {
         ...inputs,
         model_choice: modelChoice,
       });
