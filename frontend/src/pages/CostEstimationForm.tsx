@@ -67,7 +67,7 @@ const CostEstimationForm: React.FC = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post('${API_BASE_URL}/estimate', {
+      const response = await axios.post(`${API_BASE_URL}/estimate`, {
         ...inputs,
         model_choice: modelChoice,
       });
