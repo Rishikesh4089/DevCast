@@ -4,7 +4,7 @@ import 'firebase/auth';
 import Navbar from '../components/Navbar';
 import { FaUserCircle, FaCamera } from 'react-icons/fa';
 import { auth, db } from '../utils/firebase'; // your Firebase config
-import { collection, setDoc, doc } from 'firebase/firestore'; // switch to setDoc for setting user data
+import { setDoc, doc } from 'firebase/firestore'; // switch to setDoc for setting user data
 import { v4 as uuidv4 } from 'uuid';
 import { createClient } from '@supabase/supabase-js';
 
@@ -55,7 +55,7 @@ const Profile: React.FC = () => {
 
       // Handle image upload to Supabase
       if (fileUpload) {
-        const { data, error } = await supabase.storage
+        const {  error } = await supabase.storage
           .from('profiles') // Replace with your actual bucket name
           .upload(`profile-images/${docId}`, fileUpload);
 
