@@ -36,7 +36,7 @@
     margin: 0;
   }
   
-  .home-links li a {
+  .home-links li {
     text-decoration: none;
     font-size: 1.4rem;
     font-weight: bold;
@@ -44,7 +44,7 @@
     transition: color 0.3s ease;
   }
   
-  .home-links li a:hover {
+  .home-links li:hover {
     color: #1d4ed8;
   }
   

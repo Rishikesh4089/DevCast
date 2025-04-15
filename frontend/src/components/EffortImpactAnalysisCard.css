@@ -1,0 +1,71 @@
+.effort-analysis-card {
+    background: linear-gradient(135deg, #f0f4f8, #e0ecff);
+    border-radius: 1rem;
+    padding: 0.6rem;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+    max-width: 1000px;
+    margin: 0.8rem auto;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  .effort-analysis-card h2 {
+    text-align: center;
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    color: #333;
+  }
+  
+  .dropdowns {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+  }
+  
+  .dropdown-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    min-width: 250px;
+  }
+  
+  .dropdown-wrapper label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #444;
+  }
+  
+  .select {
+    width: 100%;
+  }
+  
+  p {
+    text-align: center;
+    font-size: 1.1rem;
+    color: #666;
+  }
+  
+  @media screen and (max-width: 600px) {
+    .dropdowns {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .dropdown-wrapper {
+      width: 100%;
+      align-items: center;
+    }
+  
+    .select {
+      max-width: 300px;
+    }
+  }
+  .effort-analysis-card {
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .select {
+    transition: all 0.2s ease-in-out;
+  }
+  

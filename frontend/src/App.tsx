@@ -1,22 +1,58 @@
+// src/App.tsx
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import HomePage from "./pages/home";
+import CostEstimation from "./pages/CostEstimationForm";
+import Signup from "./pages/Signup";
+import Login from "./pages/Login";
+import Profile from "./pages/Profile"; // optional user profile page
+import { AuthProvider } from "./context/AuthContext";
+import PrivateRoute from "./context/PrivateRoute";
+import LandingPage from "./pages/LandingPage";
 
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import BackgroundAnimation from './animations/background'
-import './App.css'
-import HomePage from './pages/home'
-import CostEstimationForm from './pages/CostEstimationForm';
-import EffortEstimationForm from './pages/EffortEstimationForm';
 
-function App() {
+const App: React.FC = () => {
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/cost-estimation" element={<CostEstimationForm />} />
-        <Route path="/effort-estimation" element={<EffortEstimationForm />} />
-      </Routes>
+      <AuthProvider>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<LandingPage />} />
+          {/* <Route path="/home" element={<HomePage />} /> */}
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<Login />} />
+
+          {/* Private Routes */}
+          <Route
+            path="/home"
+            element={
+              <PrivateRoute>
+                <HomePage />
+              </PrivateRoute>
+            }
+          />
+
+
+          <Route
+            path="/cost-estimation"
+            element={
+              <PrivateRoute>
+                <CostEstimation />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <PrivateRoute>
+                <Profile />
+              </PrivateRoute>
+            }
+          />
+        </Routes>
+      </AuthProvider>
     </Router>
   );
 };
 
-
-export default App
+export default App;

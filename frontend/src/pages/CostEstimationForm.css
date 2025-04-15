@@ -1,60 +1,66 @@
-/* Basic Reset */
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Remove arrows in Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
 .cost-page {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: linear-gradient(to bottom right, #e0f2fe, #bfdbfe);
   min-height: 100vh;
-  padding-bottom: 40px;
-}
-
-/* Navbar */
-.cost-nav {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 32px;
-  background: #ffffff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  flex-direction: column;
 }
 
-.cost-nav-brand {
-  display: flex;
-  align-items: center;
-  font-size: 1.4rem;
-  font-weight: 600;
-  color: #0077c2;
-  gap: 10px;
-}
-
-.home-icon {
-  color: #0077c2;
-}
-
-/* Main content */
 .cost-main {
-  padding: 40px 20px;
+  flex: 1;
   display: flex;
   justify-content: center;
+  align-items: center;
+  padding: 20px;
+  overflow-y: auto;
 }
 
-.cost-container {
+.cost-container-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 30px;
-  max-width: 1000px;
+  gap: 20px;
   width: 100%;
+  max-width: 1200px;
 }
 
 @media (min-width: 768px) {
-  .cost-container {
-    grid-template-columns: 1fr 1fr;
+  .cost-container-grid {
+    grid-template-columns: 1fr;
   }
 }
 
-/* Form */
+@media (min-width: 992px) {
+  .cost-container-grid {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+/* Left Section Form */
+.cost-left .form-title {
+  font-size: 1.6rem;
+  margin-bottom: 20px;
+  color: #0077c2;
+  text-align: center;
+}
+
 .cost-form {
   background: #ffffff;
   padding: 30px;
   border-radius: 16px;
+  width: 110%;
+  margin-right: 10px;
+  margin-left: -40px;
   box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
   animation: fadeIn 0.5s ease-in-out;
   transition: transform 0.3s;
@@ -64,58 +70,98 @@
   transform: scale(1.01);
 }
 
-.cost-form h1 {
-  font-size: 1.6rem;
-  margin-bottom: 20px;
-  color: #0077c2;
-  text-align: center;
-}
-
 .form-group {
   margin-bottom: 15px;
 }
 
 .form-group label {
   font-weight: 500;
-  margin-bottom: 5px;
+  margin-bottom: 4px;
   display: block;
   color: #444;
 }
 
-.form-group input {
+.form-group input,
+.form-group select {
   width: 100%;
   padding: 10px;
   border: 1px solid #ccd;
   border-radius: 8px;
-  transition: border 0.3s, box-shadow 0.3s;
   background-color: #f5f9ff;
+  transition: border 0.3s, box-shadow 0.3s;
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.form-group select:focus {
   border-color: #0077c2;
   outline: none;
   box-shadow: 0 0 5px rgba(0, 119, 194, 0.3);
 }
 
-/* Button */
 .cost-form button {
   width: 100%;
   padding: 12px;
   background-color: #0077c2;
   color: #fff;
   font-weight: bold;
+  font-size: medium;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
+/* Style for dropdown to match graph card aesthetics */
+.cost-form select,
+#modelChoice {
+  appearance: none;
+  background-color: #ffffff;
+  border: 2px solid #cbd5e0;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 16px;
+  color: #2d3748;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  cursor: pointer;
+}
+
+.cost-form select {
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D'14'%20height%3D'10'%20viewBox%3D'0%200%2014%2010'%20xmlns%3D'http%3A//www.w3.org/2000/svg'%3E%3Cpath%20d%3D'M1%201l6%206%206-6'%20stroke%3D'%23333'%20stroke-width%3D'2'%20fill%3D'none'%20fill-rule%3D'evenodd'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  padding-right: 36px;
+}
+
+
+.cost-form select:hover,
+#modelChoice:hover {
+  border-color: #90cdf4;
+}
+
+.cost-form select:focus,
+#modelChoice:focus {
+  border-color: #3182ce;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.4);
+}
+
+
 .cost-form button:hover {
   background-color: #005fa3;
   transform: scale(1.03);
 }
 
-/* Result Box */
+/* Center Section Result */
+.cost-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .cost-result {
   background: #ffffff;
   padding: 30px;
@@ -140,7 +186,7 @@
   color: #333;
 }
 
-.cost-result .prediction {
+.prediction {
   font-weight: bold;
   font-size: 1.4rem;
   color: #0077c2;
@@ -159,39 +205,24 @@
   font-style: italic;
 }
 
-.cost-nav {
+/* Right Section Graph */
+.effort-impact-graph {
+  width: 130%;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.row-center {
   display: flex;
-  align-items: center;
-  padding: 10px 20px;
-  background-color: #f5f5f5;
-  border-bottom: 1px solid #ccc;
+  flex-direction: column; /* <== Fixes the layout */
+  align-items: center; /* Optional: centers items horizontally */
+  gap: 20px; /* Optional: adds spacing between title and card */
 }
 
-.cost-nav-left {
-  margin-right: 10px;
-}
-
-.cost-nav-brand {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  gap: 8px;
-  font-weight: bold;
-  font-size: 18px;
-}
-
-.nav-icon {
-  cursor: pointer;
-  color: #0077c2;
-  transition: transform 0.2s ease;
-}
-
-.nav-icon:hover {
-  transform: scale(1.1);
-}
-
-
-/* Animation */
+/* Animations */
 @keyframes fadeIn {
   from {
     opacity: 0;
