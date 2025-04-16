@@ -49,7 +49,7 @@ const EffortImpactAnalysisCard: React.FC<EffortImpactAnalysisCardProps> = ({
       const inputCopy = { ...baseInputs, [param]: val };
 
       try {
-        const res = await axios.post('http://127.0.0.1:5001/estimate', {
+        const res = await axios.post('https://devcast.onrender.com/estimate', {
           ...inputCopy,
           model_choice: modelChoice,
         });

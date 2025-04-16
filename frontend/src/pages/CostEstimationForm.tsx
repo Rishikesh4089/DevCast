@@ -61,11 +61,11 @@ const CostEstimationForm: React.FC = () => {
     }
 
     //change was made here
-    const API_BASE_URL = import.meta.env.REACT_APP_API_URL;
+    // const API_BASE_URL = import.meta.env.REACT_APP_API_URL;
 
     setLoading(true);
     try {
-      const response = await axios.post(`${API_BASE_URL}/estimate`, {
+      const response = await axios.post('https://devcast.onrender.com/estimate', {
         ...inputs,
         model_choice: modelChoice,
       });
