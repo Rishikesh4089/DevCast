@@ -21,7 +21,7 @@ const Profile: React.FC = () => {
     position: '',
   });
   const [userId, setUserId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  
 
   useEffect(() => {
     const checkSession = async () => {
@@ -30,7 +30,6 @@ const Profile: React.FC = () => {
         setUserId(user.id);
         fetchUserProfile(user.id);
       }
-      setLoading(false);
     };
 
     checkSession();

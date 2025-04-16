@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { createClient } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
 import './Settings.css';
