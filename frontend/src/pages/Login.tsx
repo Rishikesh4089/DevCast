@@ -1,21 +1,22 @@
+// pages/Login.tsx
 import React, { useState } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../utils/firebase";
 import { useNavigate, Link } from "react-router-dom";
 import "./Login.css";
+import { useAuth } from "../context/AuthContext";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const { login, loading, error } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await login(email, password);
       navigate("/home");
     } catch (err) {
-      alert("Login failed: " + (err as Error).message);
+      // Error is already handled in the auth context
     }
   };
 
@@ -33,6 +34,7 @@ const Login: React.FC = () => {
         <div className="login-right">
           <form onSubmit={handleLogin} className="login-form fade-in-up">
             <h2>Log In</h2>
+            {error && <div className="error-message">{error}</div>}
             <input
               type="email"
               value={email}
@@ -40,6 +42,7 @@ const Login: React.FC = () => {
               placeholder="Email"
               required
               className="input"
+              disabled={loading}
             />
             <input
               type="password"
@@ -48,8 +51,15 @@ const Login: React.FC = () => {
               placeholder="Password"
               required
               className="input"
+              disabled={loading}
             />
-            <button type="submit" className="btn">Log In</button>
+            <button 
+              type="submit" 
+              className="btn"
+              disabled={loading}
+            >
+              {loading ? "Logging in..." : "Log In"}
+            </button>
             <p className="redirect-text">
               New user?{" "}
               <Link to="/signup" className="redirect-link">

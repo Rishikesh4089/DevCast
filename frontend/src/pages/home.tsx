@@ -14,14 +14,14 @@ const HomePage: React.FC = () => {
       <main className="home-main fade-in">
         <h1 className="fade-in-down">Welcome to the Estimation Tool</h1>
         <p className="home-subtitle fade-in-up">
-          Select a page to proceed. Get accurate cost predictions with our smart estimator.
+          Select a page to proceed. Get accurate effort predictions with our smart estimator.
         </p>
 
         <div className="home-buttons fade-in-up">
           <div className="home-card hover-scale">
-            <h3>Cost Estimation</h3>
+            <h3>Effort Estimation</h3>
             <button onClick={() => navigate('/cost-estimation')}>
-              Go to Cost Estimation
+              Go to Effort Estimation
             </button>
           </div>
         </div>

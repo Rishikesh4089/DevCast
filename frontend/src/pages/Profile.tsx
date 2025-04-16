@@ -1,14 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Profile.css';
-import 'firebase/auth';
-import Navbar from '../components/Navbar';
 import { FaUserCircle, FaCamera } from 'react-icons/fa';
-import { auth, db } from '../utils/firebase'; // your Firebase config
-import { setDoc, doc } from 'firebase/firestore'; // switch to setDoc for setting user data
-import { v4 as uuidv4 } from 'uuid';
 import { createClient } from '@supabase/supabase-js';
+import Navbar from '../components/Navbar';
 
-// 🔐 Supabase init
 const supabaseUrl = 'https://pfwewoskqpvegfpwsyxl.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmd2V3b3NrcXB2ZWdmcHdzeXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ1MTkwMjcsImV4cCI6MjA2MDA5NTAyN30.rJdn0lXGFok5vcK6pyJvhtuJflng7XCXVLMOa6AXlHw';
 const supabase = createClient(supabaseUrl, supabaseKey);
@@ -16,6 +11,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 const Profile: React.FC = () => {
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [fileUpload, setFileUpload] = useState<File | null>(null);
+  const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -24,6 +20,51 @@ const Profile: React.FC = () => {
     company: '',
     position: '',
   });
+  const [userId, setUserId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserId(user.id);
+        fetchUserProfile(user.id);
+      }
+      setLoading(false);
+    };
+
+    checkSession();
+  }, []);
+
+  const fetchUserProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        setForm({
+          name: data.name || '',
+          email: data.email || '',
+          contact: data.contact || '',
+          age: data.age ? data.age.toString() : '',
+          company: data.company || '',
+          position: data.position || '',
+        });
+
+        if (data.imageurl) {
+          setCurrentImageUrl(data.imageurl);
+          setProfileImage(data.imageurl);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    }
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -31,7 +72,7 @@ const Profile: React.FC = () => {
       const reader = new FileReader();
       reader.onload = () => setProfileImage(reader.result as string);
       reader.readAsDataURL(file);
-      setFileUpload(file); // save file for upload
+      setFileUpload(file);
     }
   };
 
@@ -42,61 +83,73 @@ const Profile: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!userId) {
+      alert('Please sign in to save your profile');
+      return;
+    }
+
     try {
-      // Check if user is authenticated (optional step if using Firebase Auth)
-      const user = auth.currentUser;
-      if (!user) {
-        alert('Please sign in to save your profile');
-        return;
-      }
+      let imageUrl = currentImageUrl || '';
 
-      const docId = uuidv4();
-      let imageUrl = '';
-
-      // Handle image upload to Supabase
+      // Handle image upload if a new file was selected
       if (fileUpload) {
-        const {  error } = await supabase.storage
-          .from('profiles') // Replace with your actual bucket name
-          .upload(`profile-images/${docId}`, fileUpload);
+        // Delete old image if it exists
+        if (currentImageUrl) {
+          const oldImagePath = currentImageUrl.split('/').pop();
+          await supabase.storage
+            .from('profiles')
+            .remove([`profile-images/${oldImagePath}`]);
+        }
 
-        if (error) throw error;
+        // Upload new image
+        const fileExt = fileUpload.name.split('.').pop();
+        const fileName = `${userId}.${fileExt}`;
+        const filePath = `profile-images/${fileName}`;
 
-        const { data: urlData } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from('profiles')
-          .getPublicUrl(`profile-images/${docId}`);
+          .upload(filePath, fileUpload, {
+            upsert: true
+          });
 
-        imageUrl = urlData?.publicUrl || '';
+        if (uploadError) throw uploadError;
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('profiles')
+          .getPublicUrl(filePath);
+
+        imageUrl = publicUrl;
+        setCurrentImageUrl(imageUrl);
       }
 
-      // Assuming Firebase Authentication is used, use currentUser.uid as the docId
-      const userId = user?.uid;
-      if (!userId) throw new Error('User is not authenticated');
-
-      // Save the user profile data to Firestore
-      const userDocRef = doc(db, 'users', userId); // Using user ID as document ID
-      await setDoc(userDocRef, {
-        ...form,
-        contact: Number(form.contact),
+      // Update profile in database
+      const { error } = await supabase.from('profiles').upsert({
+        user_id: userId,
+        name: form.name,
+        email: form.email,
+        contact: form.contact,
         age: Number(form.age),
+        company: form.company,
+        position: form.position,
         imageurl: imageUrl,
+        updated_at: new Date().toISOString(),
       });
 
+      if (error) throw error;
+
       alert('Profile saved successfully!');
-      setForm({ name: '', email: '', contact: '', age: '', company: '', position: '' });
-      setProfileImage(null);
-      setFileUpload(null);
-    } catch (err: any) {
-      console.error('Error saving profile:', err.message);
+      setFileUpload(null); // Reset file upload after successful save
+    } catch (error) {
+      console.error('Error saving profile:', error);
       alert('Error saving profile');
     }
   };
 
+
   return (
     <div className="profile-page">
-      <div className="navbar">
-        <Navbar />
-      </div>
-
+      <Navbar />
       <div className="profile-container">
         <div className="top-section">
           <div className="profile-image-wrapper">

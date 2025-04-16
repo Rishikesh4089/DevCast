@@ -1,6 +1,7 @@
 .main-navbar {
     display: flex;
     align-items: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     justify-content: space-between;
     padding: 1rem 3rem;
     background-color: #4375e0;
