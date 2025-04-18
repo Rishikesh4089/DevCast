@@ -14,7 +14,7 @@ DevCast is a web-based application designed to assist with **effort and cost est
 ## Tech Stack
 - **Frontend**: React, TypeScript, CSS
 - **Backend**: Flask, Python
-- **Database**: (Mention if you are using a database)
+- **Database**: PostgreSQL (Supabase)
 
 ## Installation
 
