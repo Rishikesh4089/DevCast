@@ -14,7 +14,7 @@ const HomePage: React.FC = () => {
       <main className="home-main fade-in">
         <h1 className="fade-in-down">Welcome to the Estimation Tool</h1>
         <p className="home-subtitle fade-in-up">
-          Select a page to proceed. Get accurate effort predictions with our smart estimator.
+          Get accurate effort predictions with our smart estimator.
         </p>
 
         <div className="home-buttons fade-in-up">
